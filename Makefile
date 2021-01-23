@@ -101,7 +101,7 @@ COMOBJECTS= jaricom.o jcomapi.o jutils.o jerror.o jmemmgr.o \
             wrppm.o wrgif.o wrtarga.o wrbmp.o \
 			jcicc.o jcphuff.o jdicc.o jdphuff.o jidctred.o \
 			turbojpeg.o jdatadst-tj.o jdatasrc-tj.o \
-			transupp.o \
+			transupp.o libyuv.o \
             $(SYSDEPMEM) $(JSIMDOBJ)
 # compression library object files
 CLIBOBJECTS= jcapimin.o jcapistd.o jcarith.o jctrans.o jcparam.o \
@@ -158,6 +158,7 @@ clean:
 	$(RM) jpegtran.exe
 	$(RM) rdjpgcom.exe
 	$(RM) wrjpgcom.exe
+	$(RM) tjexample.exe
 	$(RM) libjpeg.a
 	$(RM) testout*.*
 

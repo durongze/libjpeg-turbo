@@ -35,7 +35,7 @@
 #define DLLEXPORT
 #endif
 #define DLLCALL
-
+#include <jpeglib.h>
 
 /**
  * @addtogroup TurboJPEG
@@ -670,6 +670,9 @@ typedef void *tjhandle;
 extern "C" {
 #endif
 
+typedef int (*tjCallBackYuv444ScanLine)(JSAMPROW *row_pointer, JDIMENSION image_width, JDIMENSION num_lines);
+int tjSetCallBackYuv444ScanLine(tjCallBackYuv444ScanLine pfunc);
+int tjProcYuv444ScanLine(JSAMPROW *row_pointer, JDIMENSION image_width, JDIMENSION num_lines);
 
 /**
  * Create a TurboJPEG compressor instance.

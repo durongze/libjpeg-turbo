@@ -158,8 +158,64 @@ static void usage(char *programName)
 }
 
 
+extern int yuv_main(int argc, char **argv);
+extern int yuv_save(unsigned char *yuv, size_t yuvSize, const char *fileName);
+
+int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned int num_lines)
+{
+  static int newFile = 0;
+  char fileName[128];
+  unsigned char *row_pointer = *row;
+  int whence = 0;
+  snprintf(fileName, sizeof(fileName), "../%03dx%03d.yuv", image_width, num_lines);
+  FILE *fpYUV = fopen(fileName, "wb");
+  snprintf(fileName, sizeof(fileName), "../y_%03dx%03d.yuv", image_width, num_lines);
+  FILE *fpY = fopen(fileName, "wb");
+  snprintf(fileName, sizeof(fileName), "../u_%03dx%03d.yuv", image_width / 2, num_lines / 2);
+  FILE *fpU = fopen(fileName, "wb");
+  snprintf(fileName, sizeof(fileName), "../v_%03dx%03d.yuv", image_width / 2, num_lines / 2);
+  FILE *fpV = fopen(fileName, "wb");
+  whence = (++newFile == 1) ? SEEK_SET : SEEK_END;
+  fseek(fpYUV, 0, whence);
+  fseek(fpY, 0, whence);
+  fseek(fpU, 0, whence);
+  fseek(fpV, 0, whence);
+  long ret = ftell(fpYUV);
+  for (unsigned int i = 0; i < num_lines; ++i) {
+    for (unsigned int idx = 0; idx < image_width; ++idx) {
+      printf("i:%u, idx :%u\n", i, idx);
+      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 0, sizeof(unsigned char), 1, fpY);
+      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 0, sizeof(unsigned char), 1, fpYUV);
+      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 1, sizeof(unsigned char), 1, fpU);
+      // fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 1, sizeof(unsigned char), 1, fpYUV);
+      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpV);
+      // fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpYUV);
+    }
+  }
+  for (unsigned int i = 0; i < num_lines; i += 2) {
+    for (unsigned int idx = 0; idx < image_width; idx += 2) {
+      printf("i:%u, idx :%u\n", i, idx);
+      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 1, sizeof(unsigned char), 1, fpYUV);
+      // fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpYUV);
+    }
+  }
+  for (unsigned int i = 0; i < num_lines; i += 2) {
+    for (unsigned int idx = 0; idx < image_width; idx += 2) {
+      printf("i:%u, idx :%u\n", i, idx);
+      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpYUV);
+    }
+  }
+  fclose(fpYUV);
+  fclose(fpY);
+  fclose(fpU);
+  fclose(fpV);
+  return 0;
+}
+
 int main(int argc, char **argv)
 {
+  tjSetCallBackYuv444ScanLine(ProcYuv444ScanLine);
+  return yuv_main(argc, argv);
   tjscalingfactor scalingFactor = { 1, 1 };
   int outSubsamp = -1, outQual = -1;
   tjtransform xform;
@@ -368,6 +424,9 @@ int main(int argc, char **argv)
 
     if ((tjInstance = tjInitCompress()) == NULL)
       THROW_TJ("initializing compressor");
+    char fileName[128];
+    snprintf(fileName, sizeof(fileName), "../24rgb_%dx%d.yuv", width, height);
+    yuv_save(imgBuf, 3 * width * height, fileName);
     if (tjCompress2(tjInstance, imgBuf, width, 0, height, pixelFormat,
                     &jpegBuf, &jpegSize, outSubsamp, outQual, flags) < 0)
       THROW_TJ("compressing image");

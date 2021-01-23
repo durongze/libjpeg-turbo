@@ -34,7 +34,6 @@
 #include <ctype.h>
 #include <jinclude.h>
 #define JPEG_INTERNALS
-#include <jpeglib.h>
 #include <jerror.h>
 #include <setjmp.h>
 #include <errno.h>
@@ -683,9 +682,11 @@ DLLEXPORT int tjCompress2(tjhandle handle, const unsigned char *srcBuf,
     else
       row_pointer[i] = (JSAMPROW)&srcBuf[i * (size_t)pitch];
   }
-  while (cinfo->next_scanline < cinfo->image_height)
+  while (cinfo->next_scanline < cinfo->image_height) {
+    tjProcYuv444ScanLine(&row_pointer[cinfo->next_scanline], width, cinfo->image_height - cinfo->next_scanline);
     jpeg_write_scanlines(cinfo, &row_pointer[cinfo->next_scanline],
                          cinfo->image_height - cinfo->next_scanline);
+  }
   jpeg_finish_compress(cinfo);
 
 bailout:
@@ -2146,4 +2147,21 @@ bailout:
   if (handle) tjDestroy(handle);
   if (file) fclose(file);
   return retval;
+}
+
+static tjCallBackYuv444ScanLine cbYuv444ScanLine = NULL;
+
+int tjSetCallBackYuv444ScanLine(tjCallBackYuv444ScanLine pfunc)
+{
+  cbYuv444ScanLine = pfunc;
+
+  return 0;
+}
+
+int tjProcYuv444ScanLine(JSAMPROW *row_pointer, JDIMENSION image_width, JDIMENSION num_lines)
+{
+  if (!cbYuv444ScanLine) {
+    return -1;
+  }
+  return cbYuv444ScanLine(row_pointer, image_width, num_lines);
 }
