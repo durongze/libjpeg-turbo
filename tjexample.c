@@ -159,7 +159,7 @@ static void usage(char *programName)
 
 
 extern int yuv_main(int argc, char **argv);
-extern int yuv_save(unsigned char *yuv, size_t yuvSize, const char *fileName);
+extern int bin_save(unsigned char *yuv, size_t yuvSize, const char *fileName);
 
 int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned int num_lines)
 {
@@ -215,7 +215,7 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
 int main(int argc, char **argv)
 {
   tjSetCallBackYuv444ScanLine(ProcYuv444ScanLine);
-  return yuv_main(argc, argv);
+  // return yuv_main(argc, argv);
   tjscalingfactor scalingFactor = { 1, 1 };
   int outSubsamp = -1, outQual = -1;
   tjtransform xform;
@@ -426,7 +426,7 @@ int main(int argc, char **argv)
       THROW_TJ("initializing compressor");
     char fileName[128];
     snprintf(fileName, sizeof(fileName), "../24rgb_%dx%d.yuv", width, height);
-    yuv_save(imgBuf, 3 * width * height, fileName);
+    bin_save(imgBuf, 3 * width * height, fileName);
     if (tjCompress2(tjInstance, imgBuf, width, 0, height, pixelFormat,
                     &jpegBuf, &jpegSize, outSubsamp, outQual, flags) < 0)
       THROW_TJ("compressing image");

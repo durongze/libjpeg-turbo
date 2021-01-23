@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/tjexample.exe",
             // "args": ["../yuv_320_240.yuv", "320", "240"],
-            "args": ["../yuv_8x8.yuv", "8", "8"],
+            // "args": ["../yuv_8x8.yuv", "8", "8"],
             // "args": ["testimages/nightshot_iso_100.bmp", "testimages/nightshot.jpg"],
             
             "stopAtEntry": false,
