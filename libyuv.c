@@ -224,12 +224,14 @@ int yuv_gen_420(int cross, byte *b, size_t bsz, size_t width, size_t height)
 		return -1;
 	}
 	byte *y = b;
-	yuv_fill(y, bsz, width, height, cross);
+
 
 	if (cross == 2) {
+		yuv_fill(y, bsz, width, height, 1);
 		byte *uv = y + width * height;
 		yuv_fill(uv, bsz, width, height / 2, cross);
 	} else if (cross == 1){
+		yuv_fill(y, bsz, width, height, cross);
 		byte *u = y + width * height;
 		width /= 2;
 		height /= 2;
