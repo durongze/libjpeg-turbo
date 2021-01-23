@@ -152,15 +152,14 @@ jconfig.h: jconfig.txt
 	exit 1
 
 clean:
-	$(RM) *.o
 	$(RM) cjpeg.exe
 	$(RM) djpeg.exe
 	$(RM) jpegtran.exe
 	$(RM) rdjpgcom.exe
 	$(RM) wrjpgcom.exe
 	$(RM) tjexample.exe
-	$(RM) libjpeg.a
-	$(RM) testout*.*
+	$(RM) libjpeg.a *.o
+	$(RM) testout*.* ../*.yuv
 
 test: cjpeg.exe djpeg.exe jpegtran.exe
 	$(RM) testout*.*

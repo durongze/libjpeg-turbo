@@ -248,7 +248,7 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
 int main(int argc, char **argv)
 {
   tjSetCallBackYuv444ScanLine(ProcYuv444ScanLine);
-  // return yuv_main(argc, argv);
+  return yuv_main(argc, argv);
   tjscalingfactor scalingFactor = { 1, 1 };
   int outSubsamp = -1, outQual = -1;
   tjtransform xform;

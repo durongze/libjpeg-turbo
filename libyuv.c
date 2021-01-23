@@ -310,24 +310,35 @@ int bin_unload(byte **b)
 
 int yuv_usage(int argc, char** argv)
 {
-	PrintCtx("%s <fmt> <img> <width> <height>\n", argv[0]);
+	PrintCtx("%s <img> <fmt> <width> <height>\n", argv[0]);
 	return 0;
 }
 
-int jpeg_main(int argc, char** argv)
+int yuv_dump(int argc, char** argv)
 {
-	
+	byte *yuv = NULL;
+	size_t yuvSize = 0;
+	if (argc != 5) {
+		yuv_usage(argc, argv);	
+		return 1;
+	}
+	const char *fileName = argv[1];
+	int fmt = atoi(argv[2]);
+	size_t width = atoi(argv[3]);
+	size_t height = atoi(argv[4]);	
+	bin_load(&yuv, &yuvSize, fileName);
+	PrintYuv(fmt, yuv, width, height);
+	bin_unload(&yuv);
 	return 0;
 }
 
 int yuv_main(int argc, char** argv)
 {
-	// return jpeg_main(argc, argv);
+	return yuv_dump(argc, argv);
 	byte *yuv = NULL;
 	size_t yuvSize = 0;
 	if (argc != 4) {
 		yuv_usage(argc, argv);
-		
 		return 1;
 	}
 
