@@ -157,6 +157,19 @@ static void usage(char *programName)
   exit(1);
 }
 
+#define Rgb888ToYuv(R, G, B, Y, U, V)                            \
+	do {                                                           \
+		Y = ( (  66 * (R) + 129 * (G) +  25 * (B) + 128) >> 8) +  16; \
+		U = ( ( -38 * (R) -  74 * (G) + 112 * (B) + 128) >> 8) + 128; \
+		V = ( ( 112 * (R) -  94 * (G) -  18 * (B) + 128) >> 8) + 128; \
+	} while(0);
+
+#define YuvToRgb888(R, G, B, Y, U, V)                            \
+	do {                                                           \
+		R = clip(( 298 * ((Y) - 16) + 409 * ((V) - 128) + 128) >> 8); \
+		G = clip(( 298 * ((Y) - 16) - 100 * ((U) - 128) - 208 * ((V) - 128) + 128) >> 8); \
+		B = clip(( 298 * ((Y) - 16) + 516 * ((U) - 128) + 128) >> 8); \
+	} while(0);
 
 extern int yuv_main(int argc, char **argv);
 extern int bin_save(unsigned char *yuv, size_t yuvSize, const char *fileName);
@@ -167,6 +180,8 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
   char fileName[128];
   unsigned char *row_pointer = *row;
   int whence = 0;
+  unsigned char y, u, v, r, g, b;
+
   snprintf(fileName, sizeof(fileName), "../%03dx%03d.yuv", image_width, num_lines);
   FILE *fpYUV = fopen(fileName, "wb");
   snprintf(fileName, sizeof(fileName), "../y_%03dx%03d.yuv", image_width, num_lines);
@@ -184,25 +199,37 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
   for (unsigned int i = 0; i < num_lines; ++i) {
     for (unsigned int idx = 0; idx < image_width; ++idx) {
       printf("i:%u, idx :%u\n", i, idx);
-      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 0, sizeof(unsigned char), 1, fpY);
-      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 0, sizeof(unsigned char), 1, fpYUV);
-      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 1, sizeof(unsigned char), 1, fpU);
-      // fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 1, sizeof(unsigned char), 1, fpYUV);
-      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpV);
-      // fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpYUV);
+      r = row_pointer[i * image_width * 3 + idx * 3 + 0];
+      g = row_pointer[i * image_width * 3 + idx * 3 + 1];
+      b = row_pointer[i * image_width * 3 + idx * 3 + 2];
+      Rgb888ToYuv(r, g, b, y, u, v);
+      fwrite(&y, sizeof(unsigned char), 1, fpY);
+      fwrite(&y, sizeof(unsigned char), 1, fpYUV);
+      fwrite(&u, sizeof(unsigned char), 1, fpU);
+      // fwrite(&u, sizeof(unsigned char), 1, fpYUV);
+      fwrite(&v, sizeof(unsigned char), 1, fpV);
+      // fwrite(&v, sizeof(unsigned char), 1, fpYUV);
     }
   }
   for (unsigned int i = 0; i < num_lines; i += 2) {
     for (unsigned int idx = 0; idx < image_width; idx += 2) {
       printf("i:%u, idx :%u\n", i, idx);
-      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 1, sizeof(unsigned char), 1, fpYUV);
-      // fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpYUV);
+      r = row_pointer[i * image_width * 3 + idx * 3 + 0];
+      g = row_pointer[i * image_width * 3 + idx * 3 + 1];
+      b = row_pointer[i * image_width * 3 + idx * 3 + 2];
+      Rgb888ToYuv(r, g, b, y, u, v);
+      fwrite(&u, sizeof(unsigned char), 1, fpYUV);
+      fwrite(&v, sizeof(unsigned char), 1, fpYUV);
     }
   }
   for (unsigned int i = 0; i < num_lines; i += 2) {
     for (unsigned int idx = 0; idx < image_width; idx += 2) {
       printf("i:%u, idx :%u\n", i, idx);
-      fwrite(row_pointer+ i * image_width * 3 + idx * 3 + 2, sizeof(unsigned char), 1, fpYUV);
+      r = row_pointer[i * image_width * 3 + idx * 3 + 0];
+      g = row_pointer[i * image_width * 3 + idx * 3 + 1];
+      b = row_pointer[i * image_width * 3 + idx * 3 + 2];
+      Rgb888ToYuv(r, g, b, y, u, v);
+      // fwrite(&v, sizeof(unsigned char), 1, fpYUV);
     }
   }
   fclose(fpYUV);
