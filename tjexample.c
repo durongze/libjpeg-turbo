@@ -157,6 +157,12 @@ static void usage(char *programName)
   exit(1);
 }
 
+#define clip(min, max, v)   \
+  do {                      \
+    v = v < min ? min : v;  \
+    v = v > max ? max : v;  \
+  }
+
 #define Rgb888ToYuv(R, G, B, Y, U, V)                            \
 	do {                                                           \
 		Y = ( (  66 * (R) + 129 * (G) +  25 * (B) + 128) >> 8) +  16; \

@@ -52,6 +52,12 @@ void SetCmdDefault()
 #endif
 }
 
+#define clip(min, max, v)   \
+  do {                      \
+    v = v < min ? min : v;  \
+    v = v > max ? max : v;  \
+  }
+
 #define Rgb888ToYuv(R, G, B, Y, U, V)                                \
 	do {                                                             \
 		Y = ( (  66 * (R) + 129 * (G) +  25 * (B) + 128) >> 8) +  16 \
@@ -65,7 +71,7 @@ void SetCmdDefault()
 		G = clip(( 298 * ((Y) - 16) - 100 * ((U) - 128) - 208 * ((V) - 128) + 128) >> 8) \
 		B = clip(( 298 * ((Y) - 16) + 516 * ((U) - 128) + 128) >> 8) \
 	} while(0);
-	
+
 typedef enum {
 	YUV420_NONE,
 	YUV420_YU12,
