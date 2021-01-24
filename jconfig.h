@@ -54,6 +54,10 @@
 /* Define to 1 if the system has the type `unsigned short'. */
 #define HAVE_UNSIGNED_SHORT 1
 
+#define TARGA_SUPPORTED 1
+#define BMP_SUPPORTED 1
+#define PPM_SUPPORTED 1
+#define GIF_SUPPORTED 1
 /* Compiler does not support pointers to undefined structures. */
 /* #undef INCOMPLETE_TYPES_BROKEN */
 

@@ -9,7 +9,7 @@
 CC= gcc
 
 # You may need to adjust these cc options:
-CFLAGS= -g -Wall -I. -DTARGA_SUPPORTED=1 -DBMP_SUPPORTED=1 -DPPM_SUPPORTED=1 -DGIF_SUPPORTED=1
+CFLAGS= -g -Wall -I. 
 
 # Generally, we recommend defining any configuration symbols in jconfig.h,
 # NOT via -D switches here.
