@@ -52,11 +52,7 @@ void SetCmdDefault()
 #endif
 }
 
-#define clip(min, max, v)   \
-  do {                      \
-    v = v < min ? min : v;  \
-    v = v > max ? max : v;  \
-  }
+#define clip(v) v 
 
 #define Rgb888ToYuv(R, G, B, Y, U, V)                                \
 	do {                                                             \
@@ -211,6 +207,61 @@ void PrintYuv(YuvFmt fmt, byte *yuv, size_t width, size_t height)
 	}
 }
 
+void TransYuvToRgb(YuvFmt fmt, byte *yuv, size_t width, size_t height, byte *rgb)
+{
+	PrintCtx(" fmt:%s\n", YuvFmtStr(fmt));
+	byte *ybase = yuv;
+	byte *uvbase = yuv + width * height;
+	byte *y = NULL;
+	byte *u = NULL;
+	byte *v = NULL;
+	byte *r = NULL;
+	byte *g = NULL;
+	byte *b = NULL;
+	size_t idxRow;
+	size_t idxCol;
+	for (idxRow = 0; idxRow < height; ++idxRow) {
+		for (idxCol = 0; idxCol < width; ++idxCol) {
+			y = ybase + (idxRow * width + idxCol);	 
+			switch (fmt)
+			{
+			case YUV420_YU12:
+				u = uvbase + idxRow / 2 * width / 2 + idxCol / 2;
+				v = u + width / 2 * height / 2;
+				break;	
+			case YUV420_YV12:
+				v = uvbase + width / 2 * idxRow / 2 + idxCol / 2;
+				u = v + width / 2 * height / 2;
+				break;	
+			case YUV420_NV12:
+				if (idxCol % 2 == 0) {
+					u = uvbase + width * idxRow / 4 + idxCol;
+					v = u + 1;
+				} else {
+					v = uvbase + width * idxRow / 4 + idxCol;
+					u = v - 1;
+				}
+				break;
+			case YUV420_NV21:
+				if (idxCol % 2 == 0) {
+					v = uvbase + width * idxRow / 4 + idxCol;
+					u = v + 1;
+				} else {
+					u = uvbase + width * idxRow / 4 + idxCol;
+					v = u - 1;
+				}
+				break;
+			default:
+				break;
+			}
+			r = rgb + idxRow * width * 3 + idxCol * 3;
+			g = r + 1;
+			b = g + 1;
+			YuvToRgb888((*r), (*g), (*b), (*y), (*u), (*v));
+		}
+	}
+}
+
 int yuv_fill(byte *b, size_t bsz, size_t width, size_t height, int cross)
 {
 	size_t idxRow;
@@ -334,7 +385,7 @@ int yuv_dump(int argc, char** argv)
 
 int yuv_main(int argc, char** argv)
 {
-	return yuv_dump(argc, argv);
+	// return yuv_dump(argc, argv);
 	byte *yuv = NULL;
 	size_t yuvSize = 0;
 	if (argc != 4) {
@@ -355,7 +406,11 @@ int yuv_main(int argc, char** argv)
 	for (int fmt = YUV420_NV12; fmt <= YUV420_NV21; ++fmt) {
 		bin_load(&yuv, &yuvSize, fileName);
 		PrintYuv(fmt, yuv, width, height);
+		byte *rgb = (byte*)malloc(width * height * 3);
+		TransYuvToRgb(YUV420_NV21, yuv, width, height, rgb);
+		free(rgb);
 		bin_unload(&yuv);
 	}
+
 	return 0;
 }
