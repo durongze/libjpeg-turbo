@@ -187,14 +187,16 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
   unsigned char *row_pointer = *row;
   int whence = 0;
   unsigned char y, u, v, r, g, b;
+  unsigned int o = num_lines % 2;
+  unsigned int odd = image_width % 2;
 
-  snprintf(fileName, sizeof(fileName), "../%03dx%03d.yuv", image_width, num_lines);
+  snprintf(fileName, sizeof(fileName), "../%03dx%03d.yuv", image_width - odd, num_lines - o);
   FILE *fpYUV = fopen(fileName, "wb");
-  snprintf(fileName, sizeof(fileName), "../y_%03dx%03d.yuv", image_width, num_lines);
+  snprintf(fileName, sizeof(fileName), "../y_%03dx%03d.yuv", image_width - odd, num_lines - o);
   FILE *fpY = fopen(fileName, "wb");
-  snprintf(fileName, sizeof(fileName), "../u_%03dx%03d.yuv", image_width / 2, num_lines / 2);
+  snprintf(fileName, sizeof(fileName), "../u_%03dx%03d.yuv", image_width - odd, num_lines - o);
   FILE *fpU = fopen(fileName, "wb");
-  snprintf(fileName, sizeof(fileName), "../v_%03dx%03d.yuv", image_width / 2, num_lines / 2);
+  snprintf(fileName, sizeof(fileName), "../v_%03dx%03d.yuv", image_width - odd, num_lines - o);
   FILE *fpV = fopen(fileName, "wb");
   whence = (++newFile == 1) ? SEEK_SET : SEEK_END;
   fseek(fpYUV, 0, whence);
@@ -202,8 +204,8 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
   fseek(fpU, 0, whence);
   fseek(fpV, 0, whence);
   long ret = ftell(fpYUV);
-  for (unsigned int i = 0; i < num_lines; ++i) {
-    for (unsigned int idx = 0; idx < image_width; ++idx) {
+  for (unsigned int i = o; i < num_lines; ++i) {
+    for (unsigned int idx = odd; idx < image_width; ++idx) {
       printf("i:%u, idx :%u\n", i, idx);
       r = row_pointer[i * image_width * 3 + idx * 3 + 0];
       g = row_pointer[i * image_width * 3 + idx * 3 + 1];
@@ -217,8 +219,8 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
       // fwrite(&v, sizeof(unsigned char), 1, fpYUV);
     }
   }
-  for (unsigned int i = 0; i < num_lines; i += 2) {
-    for (unsigned int idx = 0; idx < image_width; idx += 2) {
+  for (unsigned int i = o; i < num_lines; i += 2) {
+    for (unsigned int idx = odd; idx < image_width; idx += 2) {
       printf("i:%u, idx :%u\n", i, idx);
       r = row_pointer[i * image_width * 3 + idx * 3 + 0];
       g = row_pointer[i * image_width * 3 + idx * 3 + 1];
@@ -228,8 +230,8 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
       fwrite(&v, sizeof(unsigned char), 1, fpYUV);
     }
   }
-  for (unsigned int i = 0; i < num_lines; i += 2) {
-    for (unsigned int idx = 0; idx < image_width; idx += 2) {
+  for (unsigned int i = o; i < num_lines; i += 2) {
+    for (unsigned int idx = odd; idx < image_width; idx += 2) {
       printf("i:%u, idx :%u\n", i, idx);
       r = row_pointer[i * image_width * 3 + idx * 3 + 0];
       g = row_pointer[i * image_width * 3 + idx * 3 + 1];
@@ -248,7 +250,7 @@ int ProcYuv444ScanLine(unsigned char **row, unsigned int image_width, unsigned i
 int main(int argc, char **argv)
 {
   tjSetCallBackYuv444ScanLine(ProcYuv444ScanLine);
-  return yuv_main(argc, argv);
+  // return yuv_main(argc, argv);
   tjscalingfactor scalingFactor = { 1, 1 };
   int outSubsamp = -1, outQual = -1;
   tjtransform xform;

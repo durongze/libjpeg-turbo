@@ -350,7 +350,8 @@ void PrintYuv(YuvFmt fmt, byte *yuv, size_t width, size_t height)
 	}
 }
 
-void TransYuvToRgb(YuvFmt fmt, byte *yuv, size_t width, size_t height, byte *rgb)
+void TransYuvToRgb(YuvFmt fmt, byte *yuv, size_t width, size_t height,
+	byte *rgb, unsigned int rgbPix)
 {
 	PrintCtx(" fmt:%s\n", YuvFmtStr(fmt));
 	byte *ybase = yuv;
@@ -397,7 +398,7 @@ void TransYuvToRgb(YuvFmt fmt, byte *yuv, size_t width, size_t height, byte *rgb
 			default:
 				break;
 			}
-			r = rgb + idxRow * width * 3 + idxCol * 3;
+			r = rgb + idxRow * width * rgbPix + idxCol * rgbPix;
 			g = r + 1;
 			b = g + 1;
 			YuvToRgb888((*r), (*g), (*b), (*y), (*u), (*v));
@@ -549,8 +550,9 @@ int yuv_main(int argc, char** argv)
 	for (int fmt = YUV420_NV12; fmt <= YUV420_NV21; ++fmt) {
 		bin_load(&yuv, &yuvSize, fileName);
 		PrintYuv(fmt, yuv, width, height);
-		byte *rgb = (byte*)malloc(width * height * 3);
-		TransYuvToRgb(YUV420_NV21, yuv, width, height, rgb);
+		unsigned int rgbPix = 3;
+		byte *rgb = (byte*)malloc(width * height * rgbPix);
+		TransYuvToRgb(YUV420_NV21, yuv, width, height, rgb, rgbPix);
 		GenBmpFile(rgb, 24, width, height, "test.bmp");
 		free(rgb);
 		bin_unload(&yuv);
